@@ -14,12 +14,19 @@ export const Provider = ({ children }) => {
     homeCountryName: null,
     destinationCountryName: null,
     visa: null,
+    additionalInformation: [],
   });
 
   const languages = [
     { value: "en", text: "English" },
     { value: "it", text: "Italian" },
   ];
+
+  const saveVisaApplication = (visaApplication) => {
+    setVisaApplication(visaApplication);
+    console.log(visaApplication);
+    localStorage.setItem("visaApplication", JSON.stringify(visaApplication));
+  };
 
   return (
     <Context.Provider
@@ -31,6 +38,7 @@ export const Provider = ({ children }) => {
         setSelectedLanguage,
         setVisaApplication,
         languages,
+        saveVisaApplication,
       }}
     >
       {children}{" "}

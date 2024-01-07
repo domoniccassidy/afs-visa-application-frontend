@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import { useNavigate } from "react-router";
-import { DatePicker } from "@mui/x-date-pickers";
+import { DatePicker, TimePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import "dayjs/locale/en-gb";
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -9,7 +9,7 @@ import { useContext } from "react";
 import { Context } from "./Context";
 
 function Application() {
-  const { visaApplication } = useContext(Context);
+  const { visaApplication, saveVisaApplication } = useContext(Context);
   const [isTripDetails, setIsTripDetails] = useState(true);
   const [tripDetails, setTripDetails] = useState({
     arrivalDate: null,
@@ -28,6 +28,12 @@ function Application() {
   const onSubmitTripDetails = (e) => {
     e.preventDefault();
     setIsTripDetails(false);
+    if (
+      visaApplication.visa.documentationRequired.length === 0 &&
+      !visaApplication.visa.appointmentRequired
+    ) {
+      navigate("/payment");
+    }
   };
 
   const onSubmitSupportingItems = (e) => {
@@ -113,6 +119,28 @@ function Application() {
                     }
                   />
                 </Form.Group>
+                {visaApplication.visa.additionalInformation.map((info, key) => {
+                  console.log(info);
+                  return (
+                    <Form.Group className="mb-3">
+                      <Form.Label>{info.informationTitle}</Form.Label>
+                      <Form.Control
+                        value={visaApplication.additionalInformation[key]}
+                        onChange={(e) => {
+                          var tempArray = [
+                            ...visaApplication.additionalInformation,
+                          ];
+                          tempArray[key] = e.target.value;
+                          saveVisaApplication({
+                            ...visaApplication,
+                            additionalInformation: tempArray,
+                          });
+                        }}
+                        type={info.informationDataType}
+                      />
+                    </Form.Group>
+                  );
+                })}
               </div>
 
               <Button
@@ -135,9 +163,9 @@ function Application() {
             >
               <div
                 className={
-                  "application-form " &&
-                  visaApplication.visa.documentationRequired.length == 0 &&
-                  "d-none"
+                  "application-form " +
+                  (visaApplication.visa.documentationRequired.length == 0 &&
+                    "d-none")
                 }
               >
                 <Form.Group className="mb-3">
@@ -181,6 +209,10 @@ function Application() {
                       setAppointment({ ...appointment, date: value })
                     }
                   />
+                </Form.Group>
+                <Form.Group className="d-flex flex-column">
+                  <Form.Label>Appointment Time</Form.Label>
+                  <TimePicker className="date-picker"></TimePicker>
                 </Form.Group>
               </div>
               <Button

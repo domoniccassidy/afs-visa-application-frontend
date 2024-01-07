@@ -1,19 +1,30 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Container, Row, Col, Button, Form, Modal } from "react-bootstrap";
 import { IMaskInput } from "react-imask";
 import { MaskedRange } from "imask";
 import Checkbox from "./images/checkbox.png";
+import Cross from "./images/cross.png";
 import { useNavigate } from "react-router";
+import { Context } from "./Context";
 
 function Payment() {
+  const { visaApplication } = useContext(Context);
   const [paymentComplete, setPaymentComplete] = useState(false);
   const [paymentDetails, setPaymentDetails] = useState({
     name: null,
     number: null,
     expiry: null,
     securityCode: null,
+    fail: null,
   });
   const navigate = useNavigate();
+
+  function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min) + min);
+  }
+
   return (
     <Container
       className="mt-5 ml-5 mr-5"
@@ -27,27 +38,51 @@ function Payment() {
       >
         <div className="align-items-center text-center">
           {" "}
-          <img src={Checkbox} alt="" style={{ width: "100px" }} />
+          <img
+            className={paymentDetails.fail && "d-none"}
+            src={Checkbox}
+            alt=""
+            style={{ width: "100px" }}
+          />
+          <img
+            className={!paymentDetails.fail && "d-none"}
+            src={Cross}
+            alt=""
+            style={{ width: "100px" }}
+          />
         </div>
         <Modal.Header className="justify-content-center pb-1">
           <Modal.Title className="font-weight-bold">
-            Payment Successful
+            Payment {paymentDetails.fail ? "Failed" : "Successful"}
           </Modal.Title>
         </Modal.Header>{" "}
         <Modal.Body className="text-center pt-0">
-          <p>Your application will be reviewed shortly</p>
-          <Button onClick={() => navigate("/")}>Home Page</Button>
+          <p>
+            {paymentDetails.fail
+              ? "There has been an error with your payment"
+              : "Your application will be reviewed shortly"}
+          </p>
+          <Button
+            className={paymentDetails.fail && "d-none"}
+            onClick={() => navigate("/")}
+          >
+            Home Page
+          </Button>
+          <Button
+            className={!paymentDetails.fail && "d-none"}
+            onClick={() => setPaymentComplete(false)}
+          >
+            Try Again
+          </Button>
         </Modal.Body>
       </Modal>
       <Row className="pb-5">
-        <h1 style={{ fontWeight: "700" }}>United Kingdom - Visitor Visa</h1>
+        <h1 style={{ fontWeight: "700" }}>
+          {visaApplication.destinationCountryName} -{" "}
+          {visaApplication.visa.visaType}
+        </h1>
         <Col>
-          <Form
-            onSubmit={(e) => {
-              e.preventDefault();
-              setPaymentComplete(true);
-            }}
-          >
+          <Form>
             <div className="application-form mb-2">
               <h2 className="font-weight-bold mb-4">Payment</h2>
               <Form.Group className="mb-3">
@@ -72,6 +107,7 @@ function Payment() {
                       setPaymentDetails({
                         ...paymentDetails,
                         number: e.target.value,
+                        fail: getRandomInt(0, 2) == 0 ? true : false,
                       })
                     }
                   ></IMaskInput>

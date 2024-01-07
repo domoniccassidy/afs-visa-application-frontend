@@ -8,7 +8,7 @@ import { getVisasByHomeAndDestinationCountry } from "./services/visaService";
 import Visa from "./components/Visa";
 
 function VisaSelection() {
-  const { selectedLanguage, visaApplication, setVisaApplication } =
+  const { selectedLanguage, visaApplication, saveVisaApplication } =
     useContext(Context);
   const [availableVisas, setAvailableVisas] = useState([]);
   const [selectedVisa, setSelectedVisa] = useState({
@@ -72,7 +72,7 @@ function VisaSelection() {
         className={"mt-5 " + (!visaRequired && "d-none")}
         disabled={!selectedVisa.visaId}
         onClick={() => {
-          setVisaApplication({ ...visaApplication, visa: selectedVisa });
+          saveVisaApplication({ ...visaApplication, visa: selectedVisa });
           navigate("/application/?lng=" + selectedLanguage);
         }}
       >

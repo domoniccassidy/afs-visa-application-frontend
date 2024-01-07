@@ -10,9 +10,7 @@ function Visa({ visa, visaSelected, handleVisaSelection }) {
           <span>Valid for {visa.daysValid / 365} years</span>
         )}
         <h4 style={{ fontWeight: "700" }}>{visa.visaType}</h4>
-        <span className={visa.entryTimes != null && "d-none"}>
-          Unlimited Entry
-        </span>
+        <span className={visa.entryTimes && "d-none"}>Unlimited Entry</span>
         <span className={visa.entryTimes != 1 && "d-none"}>Single Entry</span>
         <span className={visa.entryTimes != 2 && "d-none"}>Double Entry</span>
 

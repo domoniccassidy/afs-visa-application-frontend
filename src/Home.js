@@ -12,7 +12,7 @@ import { getCountries } from "./services/countryService";
 import { useState } from "react";
 
 function Home() {
-  const { darkMode, selectedLanguage, visaApplication, setVisaApplication } =
+  const { darkMode, selectedLanguage, visaApplication, saveVisaApplication } =
     useContext(Context);
   const [countries, setCountries] = useState([]);
 
@@ -50,7 +50,7 @@ function Home() {
                     aria-label="Origin Country"
                     className={darkMode && "dark-select"}
                     onChange={(e) =>
-                      setVisaApplication({
+                      saveVisaApplication({
                         ...visaApplication,
                         homeCountryId: e.target.value,
                         homeCountryName:
@@ -74,7 +74,7 @@ function Home() {
                     aria-label="Destination Country"
                     className={darkMode && "dark-select"}
                     onChange={(e) =>
-                      setVisaApplication({
+                      saveVisaApplication({
                         ...visaApplication,
                         destinationCountryId: e.target.value,
                         destinationCountryName:
