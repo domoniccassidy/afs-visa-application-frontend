@@ -82,7 +82,16 @@ function Payment() {
           {visaApplication.visa.visaType}
         </h1>
         <Col>
-          <Form>
+          <Form
+            onSubmit={(e) => {
+              e.preventDefault();
+              setPaymentDetails({
+                ...paymentDetails,
+                fail: getRandomInt(0, 2) == 0 ? true : false,
+              });
+              setPaymentComplete(true);
+            }}
+          >
             <div className="application-form mb-2">
               <h2 className="font-weight-bold mb-4">Payment</h2>
               <Form.Group className="mb-3">
@@ -107,7 +116,6 @@ function Payment() {
                       setPaymentDetails({
                         ...paymentDetails,
                         number: e.target.value,
-                        fail: getRandomInt(0, 2) == 0 ? true : false,
                       })
                     }
                   ></IMaskInput>
@@ -173,8 +181,11 @@ function Payment() {
           <div className="application-form ml-5">
             <h2 className="font-weight-bold mb-5">Costs</h2>
             <div className="cost mb-3">
-              <span>United Kingdom - Visitor Visa (1)</span>
-              <span>£115</span>
+              <span>
+                {visaApplication.visa.offeringCountry.name} -{" "}
+                {visaApplication.visa.visaType} (1)
+              </span>
+              <span>£{visaApplication.visa.price}</span>
             </div>
             <div className="cost mb-3">
               <span>AFS Processing Fee</span>
@@ -182,7 +193,7 @@ function Payment() {
             </div>
             <div className="cost font-weight-bold mt-5">
               <span>Total</span>
-              <span>£165</span>
+              <span>£{visaApplication.visa.price + 50}</span>
             </div>
           </div>
         </Col>

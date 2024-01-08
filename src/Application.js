@@ -7,21 +7,18 @@ import "dayjs/locale/en-gb";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { useContext } from "react";
 import { Context } from "./Context";
+import { getAppointmentDates } from "./services/branchService";
+import dayjs from "dayjs";
 
 function Application() {
   const { visaApplication, saveVisaApplication } = useContext(Context);
   const [isTripDetails, setIsTripDetails] = useState(true);
-  const [tripDetails, setTripDetails] = useState({
-    arrivalDate: null,
-    departureDate: null,
-    phoneNumber: null,
-    email: null,
-  });
   const [documentation, setDocumentation] = useState(null);
   const [appointment, setAppointment] = useState({
     location: null,
     date: null,
   });
+  const [availableAppointments, setAvailableAppointments] = useState([[]]);
 
   const navigate = useNavigate();
 
@@ -39,6 +36,20 @@ function Application() {
   const onSubmitSupportingItems = (e) => {
     e.preventDefault();
     navigate("/payment");
+  };
+
+  const handleLocationChange = (e) => {
+    setAppointment({
+      ...appointment,
+      location: e.target.value,
+    });
+    getAppointmentDates(
+      e.target.value,
+      visaApplication.tripDetails.arrivalDate.toJSON()
+    ).then((res) => {
+      console.log(res.data);
+      setAvailableAppointments(res.data);
+    });
   };
 
   return (
@@ -66,11 +77,13 @@ function Application() {
                   </Form.Label>
                   <DatePicker
                     className="date-picker"
-                    value={tripDetails.arrivalDate}
                     onChange={(newValue) =>
-                      setTripDetails({
-                        ...tripDetails,
-                        arrivalDate: newValue,
+                      saveVisaApplication({
+                        ...visaApplication,
+                        tripDetails: {
+                          ...visaApplication.tripDetails,
+                          arrivalDate: newValue,
+                        },
                       })
                     }
                   />
@@ -81,11 +94,13 @@ function Application() {
                   </Form.Label>
                   <DatePicker
                     className="date-picker"
-                    value={tripDetails.departureDate}
                     onChange={(newValue) =>
-                      setTripDetails({
-                        ...tripDetails,
-                        departureDate: newValue,
+                      saveVisaApplication({
+                        ...visaApplication,
+                        tripDetails: {
+                          ...visaApplication.tripDetails,
+                          departureDate: newValue,
+                        },
                       })
                     }
                   />
@@ -93,14 +108,17 @@ function Application() {
                 <Form.Group className="mb-3">
                   <Form.Label>Phone Number</Form.Label>
                   <Form.Control
-                    value={tripDetails.phoneNumber}
+                    value={visaApplication.tripDetails.phoneNumber}
                     type="tel"
                     onChange={(e) => {
                       const re = /^[0-9\b]+$/;
                       if (e.target.value === "" || re.test(e.target.value)) {
-                        setTripDetails({
-                          ...tripDetails,
-                          phoneNumber: e.target.value,
+                        saveVisaApplication({
+                          ...visaApplication,
+                          tripDetails: {
+                            ...visaApplication.tripDetails,
+                            phoneNumber: e.target.value,
+                          },
                         });
                       }
                     }}
@@ -110,11 +128,14 @@ function Application() {
                   <Form.Label>Email</Form.Label>
                   <Form.Control
                     type="email"
-                    value={tripDetails.email}
+                    value={visaApplication.tripDetails.email}
                     onChange={(e) =>
-                      setTripDetails({
-                        ...tripDetails,
-                        email: e.target.value,
+                      saveVisaApplication({
+                        ...visaApplication,
+                        tripDetails: {
+                          ...visaApplication.tripDetails,
+                          email: e.target.value,
+                        },
                       })
                     }
                   />
@@ -148,10 +169,10 @@ function Application() {
                 variant="primary"
                 type="submit"
                 disabled={
-                  tripDetails.arrivalDate == null ||
-                  tripDetails.departureDate == null ||
-                  tripDetails.phoneNumber == null ||
-                  tripDetails.email == null
+                  visaApplication.tripDetails.arrivalDate == null ||
+                  visaApplication.tripDetails.departureDate == null ||
+                  visaApplication.tripDetails.phoneNumber == null ||
+                  visaApplication.tripDetails.email == null
                 }
               >
                 Save and Continue
@@ -188,23 +209,31 @@ function Application() {
                   <Form.Label>Appointment Location</Form.Label>
                   <Form.Select
                     value={appointment.location}
-                    onChange={(e) =>
-                      setAppointment({
-                        ...appointment,
-                        location: e.target.value,
-                      })
-                    }
+                    onChange={(e) => handleLocationChange(e)}
                     aria-label="Appointment Location"
                   >
-                    <option>Choose a Location</option>
-                    <option>Beijing Branch</option>
+                    <option value={"ba8ad348-4a22-422d-844f-7b9dbc1d007e"}>
+                      Choose a Location
+                    </option>
+                    {visaApplication.visa.offeringCountry.branch?.map(
+                      (branch) => {
+                        return (
+                          <option value={branch.branchId}>
+                            {branch.branchName}
+                          </option>
+                        );
+                      }
+                    )}
                   </Form.Select>
                 </Form.Group>
                 <Form.Group className="mb-3 d-flex flex-column">
                   <Form.Label>Appointment Date</Form.Label>
                   <DatePicker
                     className="date-picker"
-                    value={appointment.date}
+                    minDate={dayjs(availableAppointments[0][0])}
+                    maxDate={dayjs(
+                      availableAppointments[availableAppointments.length - 1][0]
+                    )}
                     onChange={(value) =>
                       setAppointment({ ...appointment, date: value })
                     }
@@ -212,7 +241,11 @@ function Application() {
                 </Form.Group>
                 <Form.Group className="d-flex flex-column">
                   <Form.Label>Appointment Time</Form.Label>
-                  <TimePicker className="date-picker"></TimePicker>
+                  <TimePicker
+                    minTime={dayjs(availableAppointments[0][0])}
+                    maxTime={dayjs(availableAppointments[0][6])}
+                    className="date-picker"
+                  ></TimePicker>
                 </Form.Group>
               </div>
               <Button

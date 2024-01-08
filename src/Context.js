@@ -11,6 +11,12 @@ export const Provider = ({ children }) => {
     visaApplicationId: null,
     homeCountryId: null,
     destinationCountryId: null,
+    tripDetails: {
+      arrivalDate: null,
+      departureDate: null,
+      phoneNumber: null,
+      email: null,
+    },
     homeCountryName: null,
     destinationCountryName: null,
     visa: null,
