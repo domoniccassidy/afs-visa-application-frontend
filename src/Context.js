@@ -21,6 +21,11 @@ export const Provider = ({ children }) => {
     destinationCountryName: null,
     visa: null,
     additionalInformation: [],
+    appointment: {
+      branchId: null,
+      date: null,
+    },
+    documentation: [],
   });
 
   const languages = [

@@ -6,6 +6,7 @@ import Checkbox from "./images/checkbox.png";
 import Cross from "./images/cross.png";
 import { useNavigate } from "react-router";
 import { Context } from "./Context";
+import { createApplication } from "./services/applicationService";
 
 function Payment() {
   const { visaApplication } = useContext(Context);
@@ -24,6 +25,35 @@ function Payment() {
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min) + min);
   }
+
+  const handleCompleteApplication = () => {
+    const application = {
+      visaApplicationId: crypto.randomUUID(),
+      originCountryId: visaApplication.homeCountryId,
+      destinationCountryId: visaApplication.destinationCountryId,
+      visaId: visaApplication.visa.visaId,
+      arrivalDate: visaApplication.tripDetails.arrivalDate,
+      departureDate: visaApplication.tripDetails.departureDate,
+      email: visaApplication.tripDetails.email,
+      phoneNumber: visaApplication.tripDetails.phoneNumber,
+      branchId: visaApplication.appointment.branchId,
+    };
+
+    if (visaApplication.appointment.date == null) {
+      const appointment = {
+        appointmentId: crypto.randomUUID(),
+        branchId: visaApplication.appointment.branchId,
+        date: visaApplication.appointment.date,
+      };
+      // bookAppointment(appointment);
+    }
+    if (visaApplication.documentation.length > 0) {
+      // This is not a real endpoint in the prototype, but this would upload the documentation to blob storage
+      // uploadDocumentation();
+    }
+    console.log(application);
+    createApplication(application);
+  };
 
   return (
     <Container
@@ -85,10 +115,14 @@ function Payment() {
           <Form
             onSubmit={(e) => {
               e.preventDefault();
+              var random = getRandomInt(0, 2);
               setPaymentDetails({
                 ...paymentDetails,
-                fail: getRandomInt(0, 2) == 0 ? true : false,
+                fail: random == 0 ? true : false,
               });
+              if (random == 1) {
+                handleCompleteApplication();
+              }
               setPaymentComplete(true);
             }}
           >

@@ -15,7 +15,7 @@ function Application() {
   const [isTripDetails, setIsTripDetails] = useState(true);
   const [documentation, setDocumentation] = useState(null);
   const [appointment, setAppointment] = useState({
-    location: null,
+    branchId: null,
     date: null,
   });
   const [availableAppointments, setAvailableAppointments] = useState([[]]);
@@ -35,13 +35,21 @@ function Application() {
 
   const onSubmitSupportingItems = (e) => {
     e.preventDefault();
+    saveVisaApplication({ ...visaApplication, documentation: documentation });
     navigate("/payment");
   };
 
   const handleLocationChange = (e) => {
     setAppointment({
       ...appointment,
-      location: e.target.value,
+      branchId: e.target.value,
+    });
+    saveVisaApplication({
+      ...visaApplication,
+      appointment: {
+        ...visaApplication.appointment,
+        branchId: e.target.value,
+      },
     });
     getAppointmentDates(
       e.target.value,
@@ -208,7 +216,7 @@ function Application() {
                   <h2 className="font-weight-bold mb-4">Appointment</h2>
                   <Form.Label>Appointment Location</Form.Label>
                   <Form.Select
-                    value={appointment.location}
+                    value={appointment.branchId}
                     onChange={(e) => handleLocationChange(e)}
                     aria-label="Appointment Location"
                   >
@@ -234,9 +242,16 @@ function Application() {
                     maxDate={dayjs(
                       availableAppointments[availableAppointments.length - 1][0]
                     )}
-                    onChange={(value) =>
-                      setAppointment({ ...appointment, date: value })
-                    }
+                    onChange={(value) => {
+                      setAppointment({ ...appointment, date: value });
+                      saveVisaApplication({
+                        ...visaApplication,
+                        appointment: {
+                          ...visaApplication.appointment,
+                          date: value,
+                        },
+                      });
+                    }}
                   />
                 </Form.Group>
                 <Form.Group className="d-flex flex-column">
@@ -255,7 +270,7 @@ function Application() {
                 disabled={
                   (documentation == null &&
                     visaApplication.visa.documentationRequired.length > 0) ||
-                  ((appointment.date == null || appointment.location == null) &&
+                  ((appointment.date == null || appointment.branchId == null) &&
                     visaApplication.visa.appointmentRequired)
                 }
               >
